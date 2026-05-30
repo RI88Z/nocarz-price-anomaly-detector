@@ -15,9 +15,9 @@ Real-time application verifying whether the entered nightly price is **appropria
 @st.cache_resource
 def load_ml_components():
     try:
-        model = joblib.load("nocarz_iso_model.joblib")
-        scaler = joblib.load("nocarz_scaler.joblib")
-        features = joblib.load("nocarz_features.joblib")
+        model = joblib.load("generated/nocarz_iso_model.joblib")
+        scaler = joblib.load("generated/nocarz_scaler.joblib")
+        features = joblib.load("generated/nocarz_features.joblib")
         return model, scaler, features
     except FileNotFoundError:
         st.error(
@@ -46,7 +46,9 @@ with col1:
     bathrooms = st.number_input(
         "Bathrooms 🚿", min_value=0.0, max_value=10.0, value=1.0, step=0.5
     )
-    beds = st.number_input("Beds 🛏️", min_value=1.0, max_value=20.0, value=1.0, step=1.0)
+    beds = st.number_input(
+        "Beds 🛏️", min_value=1.0, max_value=20.0, value=1.0, step=1.0
+    )
 
     room_type = st.selectbox(
         "Room type", ["Entire home/apt", "Private room", "Shared room", "Hotel room"]
