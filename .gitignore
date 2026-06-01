@@ -3,4 +3,5 @@
 *.zst
 *.zip
 *.joblib
-*.png
+# *.png
+__pycache__
