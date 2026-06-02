@@ -29,7 +29,7 @@ Kolejność uruchamiania i czytania notatników jest odzwierciedleniem potoku da
 * **`app.py`** - Mikroserwis napisany we frameworku *FastAPI*. Serwuje predykcje przez endpoint REST, dynamicznie mapuje wejścia i ukrycie obsługuje podział ruchu (test A/B).
 * **`generated/`** - Katalog zawierający wyuczone wtyczki modelu w formacie `.joblib` (`isolation_forest_baseline.joblib` oraz `best_model_production.joblib`).
 * **`ab_test_logs.csv`** - Płaski plik bazodanowy generowany i nadpisywany przez `app.py`, służący jako rejestr zdarzeń w teście A/B.
-* **`dowod_dzialania_api.png`** - Zrzut ekranu poświadczający pomyślne wykonanie predykcji za pomocą klienta `curl`.
+* **`dowod_dzialania_api.png`** - Zrzut ekranu poświadczający pomyślne wykonanie predykcji za pomocą klienta `curl`. (*Są to screeny z 2 różnych terminali połączone w jeden obraz png*).
 
 ---
 
@@ -47,23 +47,23 @@ Serwer uruchomi się lokalnie i załaduje wyuczone modele ML. Pojawi się inform
 
 ### 2. Wykonywanie zapytań predykcyjnych (CURL)
 Mikroserwis wystawia główny endpoint `/predict_price_anomaly`. Przyjmuje on dane w formacie JSON. 
-Zaletą implementacji jest jej **odporność na braki w danych** - klient nie musi przesyłać wszystkich kolumn, API w locie uzupełni luki odpowiednimi wartościami neutralnymi (zgodnie z listą cech modelu).
+Zaletą implementacji jest jej **odporność na braki w danych** - klient nie musi przesyłać wszystkich kolumn, API w locie uzupełni luki odpowiednimi wartościami neutralnymi oraz automatycznie odtworzy potok transformacji danych (np. logarytmowanie, obliczanie wagi udogodnień ze słownika, skalowanie).
 
 Aby przetestować działanie, otwórz nowe okno terminala i wyślij próbne zapytanie za pomocą `curl`:
 
 ```bash
-curl -X POST -H "Content-Type:application/json" -d '{"id": "12345", "price": 1500, "accommodates": 2, "bedrooms": 1, "beds": 1, "number_of_reviews": 5, "review_scores_rating": 4.5}' http://localhost:8080/predict_price_anomaly
+curl -X POST -H "Content-Type:application/json" -d '{"id": "777", "price": 4500, "accommodates": 4, "bedrooms": 2, "bathrooms": 1.5, "beds": 2, "room_type": "Entire home/apt", "host_response_rate": 0.95, "amenities": ["Wifi", "Kitchen", "Hot water"]}' http://localhost:8080/predict_price_anomaly
 ```
 
 **Spodziewana odpowiedź serwera (JSON):**
 ```json
 {
-  "offer_id": "12345",
+  "offer_id": "777",
   "anomaly_detected": true,
   "status": "success"
 }
 ```
-*Gdzie `anomaly_detected: true` oznacza, że dany model zakwalifikował ofertę jako posiadającą celowo zawyżoną cenę.*
+*Gdzie `anomaly_detected: true` oznacza, że dany model zakwalifikował ofertę jako posiadającą celowo zawyżoną cenę (anomalię).*
 
 ### 3. Transparentny Test A/B
 Wysyłając zapytanie JSON, nie wiesz, który z modeli przygotował odpowiedź (pełna przezroczystość dla usług zewnętrznych). 
