@@ -21,13 +21,13 @@ Kolejność uruchamiania i czytania notatników jest odzwierciedleniem potoku da
 2. **`02_Data_Transformation_and_Feature_Engineering.ipynb`**
    Inżynieria cech. Skrypt agregujący opinie, kodujący udogodnienia i łączący tabele. Jego wynikiem jest gotowy zbiór `production_dataset.csv`.
 3. **`03_Modeling_and_Evaluation.ipynb`**
-   Właściwe modelowanie i selekcja ostatecznego modelu. Zestawienie nienadzorowanego algorytmu bazowego (*Isolation Forest*) z wysoce zoptymalizowanym modelem nadzorowanym (*Random Forest*). Skrypt optymalizuje autorską metrykę Swoistości i eksportuje gotowe modele.
+   Właściwe modelowanie i selekcja ostatecznego modelu. Zestawienie nienadzorowanego algorytmu bazowego (*Isolation Forest*) z wysoce zoptymalizowanym modelem nadzorowanym (*Extra Trees*). Skrypt optymalizuje autorską metrykę Swoistości i eksportuje gotowe modele.
 4. **`04_AB_Test_Evaluation.ipynb`**
    Skrypt do oceny statystycznej (Test Chi-kwadrat) przeprowadzonych testów A/B na podstawie logów z mikroserwisu.
 
 ### Kod Produkcyjny i Artefakty
 * **`app.py`** - Mikroserwis napisany we frameworku *FastAPI*. Serwuje predykcje przez endpoint REST, dynamicznie mapuje wejścia i ukrycie obsługuje podział ruchu (test A/B).
-* **`generated/`** - Katalog zawierający wyuczone wtyczki modelu w formacie `.joblib` (`isolation_forest_baseline.joblib` oraz `random_forest_production.joblib`).
+* **`generated/`** - Katalog zawierający wyuczone wtyczki modelu w formacie `.joblib` (`isolation_forest_baseline.joblib` oraz `best_model_production.joblib`).
 * **`ab_test_logs.csv`** - Płaski plik bazodanowy generowany i nadpisywany przez `app.py`, służący jako rejestr zdarzeń w teście A/B.
 * **`dowod_dzialania_api.png`** - Zrzut ekranu poświadczający pomyślne wykonanie predykcji za pomocą klienta `curl`.
 
@@ -69,6 +69,6 @@ curl -X POST -H "Content-Type:application/json" -d '{"id": "12345", "price": 150
 Wysyłając zapytanie JSON, nie wiesz, który z modeli przygotował odpowiedź (pełna przezroczystość dla usług zewnętrznych). 
 Pod spodem mikroserwis z każdym zapytaniem **losuje w proporcjach 50/50** pomiędzy:
 * Modelem A (Isolation Forest - Baseline)
-* Modelem B (Random Forest - Ostateczny, wyoptymalizowany)
+* Modelem B (Extra Trees - Ostateczny, wyoptymalizowany)
 
 Z każdym zapytaniem `curl`, aplikacja zapisuje fakt obsługi do pliku `ab_test_logs.csv` zawierającego stempel czasowy, id oferty, nazwę użytego modelu oraz decyzję (0 - OK, 1 - Anomalia). Aby przetestować spójność, po kilku strzałach w API zajrzyj do w/w pliku .csv, a następnie uruchom notatnik `04_AB_Test_Evaluation.ipynb`, który podda te wyniki ocenie statystycznej.
