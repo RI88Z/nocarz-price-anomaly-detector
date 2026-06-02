@@ -5,3 +5,5 @@
 *.joblib
 # *.png
 __pycache__
+generated/*
+!generated/.gitkeep
